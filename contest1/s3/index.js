@@ -93,3 +93,43 @@ fs.readFile("./events.txt", "utf8", (err,data) => {
     });
 
 });
+
+
+
+
+fs.readFile("message.txt", "utf8", (err, data) => {
+    if (err) {
+        console.log("Error reading message.txt");
+        return;
+    }
+
+    let upperText = data.toUpperCase();
+
+    fs.writeFile("uppercase.txt", upperText, (err) => {
+        if (err) {
+            console.log("Error writing uppercase.txt");
+            return;
+        }
+
+        fs.readFile("uppercase.txt", "utf8", (err, newData) => {
+            if (err) {
+                console.log("Error reading uppercase.txt");
+                return;
+            }
+
+            let words = newData.split(" ");
+            let count = words.length;
+
+            let summary = "Total words: " + count;
+
+            fs.writeFile("summary.txt", summary, (err) => {
+                if (err) {
+                    console.log("Error writing summary.txt");
+                    return;
+                }
+
+                console.log("All files created successfully!");
+            });
+        });
+    });
+});
