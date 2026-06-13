@@ -1,0 +1,5 @@
+
+    Highest : 90
+    Lowest : 45
+    Average MArks : 70
+    
