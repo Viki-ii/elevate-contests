@@ -1,2 +1,2 @@
 # MITS ELEVATE CONTEST FILES
-## stared 5th June
+stared 5th June
