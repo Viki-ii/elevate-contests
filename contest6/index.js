@@ -279,6 +279,10 @@ const bookingSchema = z.object({
     seats: z.number().min(1)
 });
 
+const updateBookingSchema = z.object({
+    seats: z.number().min(1)
+});
+
 app.post("/bookings/:userId", authMiddleware, (req, res) => {
 
     const userId = Number(req.params.userId);
@@ -413,7 +417,18 @@ app.put("/bookings/:userId/:bookingId", authMiddleware, (req, res) => {
 
     const userId = Number(req.params.userId);
     const bookingId = Number(req.params.bookingId);
-    const seats = Number(req.body.seats);
+    //const seats = Number(req.body.seats);
+
+    const result = updateBookingSchema.safeParse(req.body);
+
+    if (!result.success) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid input"
+        });
+    }
+
+    const { seats } = result.data;
 
     const booking = req.user.bookings.find(
         booking => booking.bookingId === bookingId
@@ -509,6 +524,49 @@ app.delete("/bookings/:userId/:bookingId", authMiddleware, (req, res) => {
     return res.json({
         success: true,
         message: "Booking cancelled successfully"
+    });
+});
+
+
+app.get("/summary/:userId", authMiddleware, (req, res) => {
+
+    const userId = Number(req.params.userId);
+
+    if (req.user.id !== userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Access denied"
+        });
+    }
+
+    const bookings = req.user.bookings;
+
+    const confirmedBookings = bookings.filter(
+        booking => booking.status === "confirmed"
+    );
+
+    const cancelledBookings = bookings.filter(
+        booking => booking.status === "cancelled"
+    );
+
+    const totalAmountSpent = confirmedBookings.reduce(
+        (sum, booking) => sum + booking.totalAmount,
+        0
+    );
+
+    const totalSeatsBooked = confirmedBookings.reduce(
+        (sum, booking) => sum + booking.seats,
+        0
+    );
+
+    return res.status(200).json({
+        userId: req.user.id,
+        username: req.user.username,
+        totalBookings: bookings.length,
+        totalAmountSpent,
+        confirmedBookings: confirmedBookings.length,
+        cancelledBookings: cancelledBookings.length,
+        totalSeatsBooked
     });
 });
 
